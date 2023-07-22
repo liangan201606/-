@@ -1,0 +1,65 @@
+<template>
+  <div class="login">
+    <div class="loginTop">
+      <img src="../assets/网易云音乐-01.svg" alt="">
+    </div>
+    <div class="loginContent">
+      <input type="text" placeholder="手机号码登录" class="Phone">
+      <input type="passworld" placeholder="输入密码" class="Password">
+      <button>手机号码登录</button>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+
+}
+</script>
+
+<style lang="less" scoped>
+.login{
+  background-color: #fff;
+  .loginTop{
+    width: 100%;
+    height:6rem;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    img{
+      width: 80%;
+      height: 90%;
+    }
+  }
+  .loginContent{
+    width: 100%;
+    height: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    button{
+      width: 70%;
+      height: 1rem;
+      margin-top:0.6rem ;
+      border-radius: 0.5rem;
+      color:#fff;
+      border:none;
+      background-color:red;
+    }
+    .Phone{
+      width: 50%;
+      height: 1.5rem;
+      font-size: 20px;
+      border:none;
+    }
+    .Password{
+      width: 50%;
+      height:1.5rem;
+      font-size: .4rem;
+      margin-top:0.6rem ;
+      border:none;
+    }
+
+  }
+}
+</style>

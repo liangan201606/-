@@ -1,0 +1,259 @@
+<template>
+  <div class="searchTop">
+    <svg class="icon" aria-hidden="true" @click="$router.go(-1)">
+        <use xlink:href="#icon-zuojiantou"></use>
+    </svg>
+    <input type="text" placeholder="搜索" v-model="searchKey" @keydown.enter="enterKey">
+    <svg class="icon" aria-hidden="true" @click="issearchShow=false">
+        <use xlink:href="#icon-zuojiantou"></use>
+    </svg>
+  </div>
+  <div class="searchHistroy">
+    <span class="searchSpan">历史</span>
+    <span v-for="item in keyWordList" :key="item" class="spanKey" @click="searchHistory(item)">
+      {{item}}
+    </span>
+    <svg class="icon" aria-hidden="true" @click="deleteHistory">
+        <use xlink:href="#icon-shanchu"></use>
+    </svg>
+  </div>
+
+  <div class="searchList" v-show=" issearchShow">
+      <div class="itemList" v-for="(item,i) in searchList" :key="i">
+        <div class="ContentLeft" @click="updateIndex(item,i)">
+          <span class="spanLeft">{{i+1}}</span>
+          <div class="itemName">
+            <p>{{item.name}}</p>
+            <span v-for="(item1, index) in item.ar" :key="index">{{
+              item1.name
+            }}</span>
+          </div>
+        </div>
+        <div class="ContentRight">
+          <svg class="iconMv" aria-hidden="true" v-if="item.mv !=0">
+            <use xlink:href="#icon-shipin"></use>
+          </svg>
+          <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-a-31liebiao1"></use>
+          </svg>
+        </div> 
+      </div>
+  </div>
+
+  <div class="HotList" v-show="!issearchShow">
+    <h4>热搜榜</h4>
+    <ul class="Hot">
+      <li class="itemHot" v-for="(item,j) in HotList" :key="j" @click="Hotsong(item)">
+        <div class="HotName">
+          <span class="Hotindex">{{j+1}}</span>
+          <span class="name">{{item.searchWord}}</span>
+          <span class="iconUrl" v-if="item.iconType!=0"><img :src="item.iconUrl" alt=""></span>
+        </div>
+        <div class="Hotcontent">
+          <span>{{item.content}}</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+</template>
+
+<script>
+import {getSearchMusic,getHotList} from '../request/api/item.js'
+export default {
+  data(){
+    return {
+      keyWordList:[],
+      searchKey:'',//接收输入的字符串
+      searchList:[],
+      // 是否出现热搜榜单
+      issearchShow:false,
+      HotList:[]
+    }
+  },
+  mounted(){
+    // 渲染判断关键词数组是否为空 如果为空则给其赋值
+    this.keyWordList = JSON.parse(localStorage.getItem('keyWordList')) ? JSON.parse(localStorage.getItem('keyWordList')) : [],
+    this.searchHot()
+  },
+  methods: {
+    enterKey: async function(){
+      if(this.searchKey!==''){
+        this.keyWordList.unshift(this.searchKey)
+        // 去重
+        this.keyWordList = [...new Set(this.keyWordList)]
+        // 限定长度
+        if(this.keyWordList.length>5){
+          this.keyWordList.splice(this.keyWordList.length-1,1)
+        }
+        localStorage.setItem("keyWordList",JSON.stringify(this.keyWordList))
+        // 发起请求搜索
+        let res = await getSearchMusic(this.searchKey)
+        this.searchList = res.data.result.songs
+        this.issearchShow = true
+        this.searchKey = ''
+      }
+    },
+    deleteHistory:function(){
+      // 删除搜索记录
+      localStorage.removeItem('keyWordList')
+      this.keyWordList=[]
+    },
+    searchHistory:async function(item){
+      // 发起请求
+        let res = await getSearchMusic(item)
+        this.searchList = res.data.result.songs
+        this.issearchShow = true
+    },
+    updateIndex:function(item){
+      // 把歌曲放在歌单列表中
+      this.$store.commit("pushSongList",item)
+      // 获取歌曲对应的下标 播放歌曲
+      this.$store.commit('updateSongListIndex',this.$store.state.songList.length-1)
+    },
+    searchHot:async function(){
+      // 发起请求
+      let result = await getHotList()
+      this.HotList = result.data.data
+      console.log(this.HotList);
+    },
+    Hotsong:async function(item){
+      let res = await getSearchMusic(item.searchWord)
+      this.searchList = res.data.result.songs
+      this.issearchShow = true
+      console.log(res);
+    }
+  }
+}
+</script>
+
+<style lang="less" scoped>
+  .searchTop{
+    width: 100%;
+    height:1rem;
+    padding: 0 0.2rem;
+    display: flex;
+    align-items: center;
+    position: relative;
+    input{
+      width:75%;
+      padding: .1rem;
+      margin-left: 0.4rem;
+      border: none;
+      border-bottom:0.02rem solid #999 ;
+    }
+  }
+  .searchHistroy{
+    width:100%;
+    padding: .2rem;
+    .searchSpan{
+      font-weight: 700;
+    }
+    .spanKey{
+      padding:0.1rem .2rem;
+      background-color: #ccc;
+      border-radius: .3rem;
+      margin: 0.1rem 0.2rem;
+      display:inline-block;
+    }
+    .icon{
+      width: 0.5rem;
+      height: 0.5rem;
+      position: absolute;
+      right: .2rem;
+    }
+  }
+  .searchList{
+    width: 100%;
+    // padding-top: 0.6rem;
+    padding-left:0.2rem;
+    padding-right:0.2rem;
+    .itemList{
+      width: 100%;
+      display: flex;
+      height: 1.4rem;
+      justify-content: space-between;
+      align-items: center;
+      .ContentLeft{
+        // width: 85%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .itemName{
+          span{
+            font-weight: 400;
+            font-size: 0.24rem;
+            color:#999
+          }
+          p{
+            font-weight: 700;
+            margin-bottom: .08rem;
+          }
+        }
+        .spanLeft{
+          margin-right: 0.3rem;
+          display: inline-block;
+          width: 0.2rem;
+          text-align: center;
+        }
+      }
+      .ContentRight{
+        // width: 20%;
+        // height: 100%;
+        display: flex;
+        // justify-content: space-between;
+        align-items: center;
+        // position: relative;
+        .iconMv{
+          width: 0.5rem;
+          height: 0.5rem;
+          fill: #999;
+          margin-right: 0.3rem;
+          stroke: #999;
+          // stroke-width: 50;
+        }
+        .icon{
+          fill: #999;
+        }
+      }
+    }
+  }
+  .HotList{
+    width: 100%;
+    height: 15rem;
+    padding-left:0.1rem;
+    margin-bottom: 8rem;
+    .Hot{
+      width: 100%;
+      height: 1.5rem;
+      .itemHot{
+        margin-bottom:.4rem;
+        display:flex;
+        justify-content: space-between;
+        flex-direction: column;
+        .HotName{
+          .name{
+            margin-left:0.1rem;
+            font-weight:700;
+          }
+          .iconUrl{
+            margin-left:0.2rem;
+            img{
+              width: 0.8rem;
+              height:0.5rem;
+            }
+          }
+        }
+        .Hotcontent{
+          margin-top:0.2rem;
+          font-size:0.24rem;
+          color:rgb(137, 135, 135);
+        }
+      }
+      // &:itemHot:nth-child(2){
+		  //   .Hotindex{
+      //     color:red
+      //   }
+	    // }
+    }
+  }
+</style>

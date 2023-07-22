@@ -1,0 +1,155 @@
+<template>
+  <div class="UserTop">
+    <img :src="msg.backgroundUrl" alt="" class="backPic">
+     <svg class="icon" aria-hidden="true" @click="$router.push('/')">
+          <use xlink:href="#icon-zuojiantou"></use>
+    </svg>
+    <!-- <img src="../assets/网易云音乐-01.svg" alt="" class="backPic"> -->
+    <div class="User">
+        <img :src="msg.avatarUrl" alt="" class="nickPic">
+        <p class="nickname">{{msg.nickname}}</p>
+        <!-- <img src="../assets/cd.png" alt="" class="nickPic"> -->
+        <!-- <P>两岸</P> -->
+        <div class="message_one">
+          <span>关注:2</span>
+          <span>粉丝:0</span>
+          <span>Lv:3</span>
+        </div>
+        <div class="message_two">
+          <span>IP属地:四川</span>
+          <span>四川 成都</span>
+          <span>村龄:3</span>
+        </div>
+    </div>
+
+    <div class="UserConten">
+      <p class="basc">基本信息</p>
+      <p>村龄:3</p>
+      <p>性别:女</p>
+      <p>地区:四川成都</p>
+    </div>
+
+    <div class="loginOut">
+      <button @click="userLoginOut">退出登录</button>
+    </div>
+  </div>
+</template>
+
+<script>
+import {mapMutations,mapState} from 'vuex'
+import {getLoginOut} from '../request/api/home.js'
+export default {
+  computed:{
+    ...mapState(['user'])
+  },
+  data(){
+    return {
+    }
+  },
+  mounted(){
+    if(this.user=={})
+    {
+      //  this.user = JSON.parse(localStorage.getItem('usermgs'))
+       this.msg = JSON.parse(localStorage.getItem('usermgs'))
+    }else{
+      this.msg = this.user
+    }
+    // this.user= JSON.parse(localStorage.getItem('usermgs')) ? JSON.parse(localStorage.getItem('usermgs')) : [],
+    console.log(this.user);
+    console.log(this.msg);
+    console.log(JSON.parse(localStorage.getItem('usermgs')))
+  },
+  methods:{
+    ...mapMutations(['updataUser']),
+    userLoginOut:async function(){
+      let res = await getLoginOut()
+      // console.log(res);
+      if(res.data.code === 200){
+        this.user={}
+        this.$store.commit('updataUser',{})
+        this.$store.commit('updataIsLogin',false)
+        this.$store.commit('updataToken','')
+        this.$router.push('/')
+      }
+    }
+  } 
+}
+</script>
+
+<style lang="less" scoped>
+.UserTop{
+  width: 100%;
+  height: 4rem;
+  background-color: rgb(218, 196, 196);
+  position: relative;
+  .backPic{
+    width:100%;
+    height: 3rem;
+  }
+  .icon{
+    width: 1rem;
+    height: 1rem;
+    fill:#fff;
+    position:absolute;
+    top:0.2rem;
+    right:6.5rem
+  }
+  .User{
+    width: 85%;
+    height: 3rem;
+    position: absolute;
+    top: 3.5rem;
+    left:0.5rem;
+    padding-top:0.5rem;
+    background-color:rgb(225, 224, 224);
+    border-radius:0.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    .nickname{
+      font-weight: 700;
+      font-size: .4rem;
+    }
+    .nickPic{
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      position: absolute;
+      bottom:2.5rem
+    }
+    span{
+      margin-right: .8rem;
+    }
+  }
+  .UserConten{
+    width: 85%;
+    height: 3rem;
+    position: absolute;
+    top:7rem;
+    left:0.5rem;
+    padding-left:0.2rem ;
+    background-color:rgb(225, 224, 224);
+    border-radius:0.20rem;
+    display: flex;
+    flex-direction: column;
+    // align-items: center;
+    justify-content: space-around;
+    .basc{
+      font-weight: 700;
+    }
+  }
+  .loginOut{
+    // width: 80%;
+    position: absolute;
+    top:10.5rem;
+    left:1.5rem;
+    button{
+      width: 4rem;
+      height: 1rem;
+      border:none;
+      border-radius: .25rem;
+    }
+  }
+}
+</style>
